@@ -1,14 +1,11 @@
 package chap11.section4
 
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.system.measureTimeMillis
 
-//var counter = 0
-var counter = AtomicInteger(0) // 원자변수 CPU의 기계어 명령 하나로 컴파일하게됨..
-
+var counter = 0
+val counterContext = newSingleThreadContext("CounterContext") // 특정 문맥에서 작동하도록 단일 스레드에 가둠. 이방법은 느림
 
 suspend fun massiveRun(action: suspend () -> Unit) {
     /*
@@ -33,9 +30,10 @@ suspend fun massiveRun(action: suspend () -> Unit) {
 
 fun main() = runBlocking {
     massiveRun {
-//        counter ++
-        counter.incrementAndGet()
+        withContext(counterContext) {// 단일 스레드에 가둠
+            counter ++
+        }
     }
-//    println(counter)
-    println(counter.get())
+
+    println(counter)
 }
