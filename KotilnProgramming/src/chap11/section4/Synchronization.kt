@@ -1,11 +1,12 @@
 package chap11.section4
 
 import kotlinx.coroutines.*
-import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.system.measureTimeMillis
 
+var mutex = Mutex() // mutual exclusion (상호배제)
 var counter = 0
-val counterContext = newSingleThreadContext("CounterContext") // 특정 문맥에서 작동하도록 단일 스레드에 가둠. 이방법은 느림
 
 suspend fun massiveRun(action: suspend () -> Unit) {
     /*
@@ -30,8 +31,8 @@ suspend fun massiveRun(action: suspend () -> Unit) {
 
 fun main() = runBlocking {
     massiveRun {
-        withContext(counterContext) {// 단일 스레드에 가둠
-            counter ++
+        mutex.withLock {  // mutex.lock(); try {} finally { mutex.unlock() }
+            counter++
         }
     }
 
